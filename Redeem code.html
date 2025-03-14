@@ -1,0 +1,144 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registration & Rewards</title>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; background: #f0f8ff; }
+        .popup, .wallet-popup, .success-popup, .error-popup { 
+            display: none; 
+            position: fixed; 
+            top: 50%; left: 50%; 
+            transform: translate(-50%, -50%); 
+            width: 80vw; height: 50vh; 
+            background: white; 
+            border-radius: 10px; 
+            box-shadow: 0px 0px 15px gray;
+            padding: 20px; 
+            z-index: 1000;
+        }
+        .wallet-popup { height: auto; width: 60vw; padding: 20px; }
+        .success-popup, .error-popup { height: auto; width: 40vw; text-align: center; padding: 30px; }
+        .wallet-icon, .close-popup, .close-wallet, .close-success, .close-error { cursor: pointer; float: right; font-size: 20px; }
+        .earn-options { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; }
+        .earn-option { 
+            text-align: center; 
+            cursor: pointer; 
+            font-size: 24px; 
+            background: #f4f4f4;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        .wallet { position: fixed; top: 10px; right: 10px; cursor: pointer; font-size: 18px; background: yellow; padding: 10px; border-radius: 5px; }
+        select, button { padding: 10px; font-size: 16px; margin-top: 10px; }
+        .register-container { background: white; padding: 30px; border-radius: 10px; box-shadow: 0px 0px 15px gray; width: 50%; margin: auto; }
+    </style>
+</head>
+<body>
+    <div id="registerPage" class="register-container">
+        <h2>Register</h2>
+        <form id="registerForm">
+            <input type="text" id="fullName" placeholder="Full Name" required> <br><br>
+            <input type="tel" id="mobile" placeholder="Mobile Number" required> <br><br>
+            <button type="button" onclick="submitRegistration()">Submit</button>
+        </form>
+    </div>
+    
+    <div id="popup" class="popup">
+        <span class="close-popup" onclick="closePopup()">&times;</span>
+        <h3>Earn Coins</h3>
+        <div class="earn-options">
+            <div class="earn-option" onclick="earnCoins(5)">📺<br>Watch Ads (5 coins)</div>
+            <div class="earn-option" onclick="earnCoins(10)">🎮<br>Play Games (10 coins)</div>
+            <div class="earn-option" onclick="earnCoins(10)">📋<br>Fill Surveys (10 coins)</div>
+            <div class="earn-option" onclick="earnCoins(15)">👥<br>Invite Friends (15 coins)</div>
+        </div>
+        <div class="wallet" onclick="openWallet()">💰 Wallet: <span id="coinCount">10</span> Coins</div>
+    </div>
+    
+    <div id="walletPopup" class="wallet-popup">
+        <span class="close-wallet" onclick="closeWallet()">&times;</span>
+        <h3>Redeem Coins</h3>
+        <p>Your Coins: <span id="walletCoins">10</span></p>
+        <select id="redeemSelect">
+            <option value="10">10 Coins = 1 Rupee</option>
+            <option value="50">50 Coins = 5 Rupees</option>
+            <option value="100">100 Coins = 10 Rupees</option>
+        </select>
+        <br><br>
+        <h4>Select Payment Method:</h4>
+        <select id="paymentMethod">
+            <option value="Play Store">Play Store Redeem Code</option>
+            <option value="UPI">UPI</option>
+            <option value="PhonePe">PhonePe Wallet</option>
+            <option value="Paytm">Paytm Wallet</option>
+        </select>
+        <br><br>
+        <button class="redeem-btn" onclick="redeemSelectedCoins()">Redeem</button>
+    </div>
+    
+    <div id="successPopup" class="success-popup">
+        <span class="close-success" onclick="redirectToEarnPopup()">&times;</span>
+        <h3>Congratulations!</h3>
+        <p>You've redeemed successfully!</p>
+        <p id="redeemCode" style="font-weight: bold; color: green;"></p>
+        <button onclick="redirectToEarnPopup()">OK THANKS</button>
+    </div>
+
+    <div id="errorPopup" class="error-popup">
+        <span class="close-error" onclick="closeErrorPopup()">&times;</span>
+        <h3>Error</h3>
+        <p>Not enough coins to redeem!</p>
+    </div>
+    
+    <script>
+        let coins = 10;
+        function submitRegistration() {
+            document.getElementById("registerPage").style.display = "none";
+            openPopup();
+        }
+        function openPopup() {
+            document.getElementById("popup").style.display = "block";
+        }
+        function earnCoins(amount) {
+            coins += amount;
+            document.getElementById("coinCount").innerText = coins;
+            document.getElementById("walletCoins").innerText = coins;
+        }
+        function openWallet() {
+            document.getElementById("walletPopup").style.display = "block";
+        }
+        function closeWallet() {
+            document.getElementById("walletPopup").style.display = "none";
+        }
+        function closePopup() {
+            document.getElementById("popup").style.display = "none";
+        }
+        function closeErrorPopup() {
+            document.getElementById("errorPopup").style.display = "none";
+        }
+        function redirectToEarnPopup() {
+            document.getElementById("successPopup").style.display = "none";
+            openPopup();
+        }
+        function generateRedeemCode() {
+            return Math.random().toString(36).substring(2, 14).toUpperCase();
+        }
+        function redeemSelectedCoins() {
+            let select = document.getElementById("redeemSelect");
+            let coinCost = parseInt(select.value);
+            let paymentMethod = document.getElementById("paymentMethod").value;
+            if (coins >= coinCost) {
+                coins -= coinCost;
+                document.getElementById("coinCount").innerText = coins;
+                document.getElementById("walletCoins").innerText = coins;
+                document.getElementById("redeemCode").innerText = paymentMethod === "Play Store" ? "Your Redeem Code: " + generateRedeemCode() : "";
+                document.getElementById("successPopup").style.display = "block";
+            } else {
+                document.getElementById("errorPopup").style.display = "block";
+            }
+        }
+    </script>
+</body>
+</html>
